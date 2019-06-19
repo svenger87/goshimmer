@@ -1,4 +1,4 @@
-package ledger
+package ledgerstate
 
 import (
 	"sync"
@@ -6,7 +6,7 @@ import (
 	"github.com/iotaledger/goshimmer/packages/ternary"
 )
 
-type LedgerState map[ternary.Trinary]*AddressEntry
+type LedgerState map[ternary.Trytes]*AddressEntry
 
 type AddressEntry struct {
 	accumulated      int64
