@@ -7,19 +7,15 @@ import (
 	"github.com/magiconair/properties/assert"
 )
 
-func TestBalance_SettersGetters(t *testing.T) {
-	balance := New()
-	balance.SetValue(int64(^uint64(0) >> 1))
-	balance.SetTimestamp(^uint64(0))
+func TestBalance_Getters(t *testing.T) {
+	balance := NewValue(int64(^uint64(0)>>1), ^uint64(0))
 
 	assert.Equal(t, balance.GetValue(), int64(^uint64(0)>>1), "MaxValue")
 	assert.Equal(t, balance.GetTimestamp(), ^uint64(0), "MaxTimestamp")
 }
 
 func TestBalance_MarshalUnmarshalGetters(t *testing.T) {
-	balance := New()
-	balance.SetValue(int64(^uint64(0) >> 1))
-	balance.SetTimestamp(^uint64(0))
+	balance := NewValue(int64(^uint64(0)>>1), ^uint64(0))
 
 	balanceByte := balance.Marshal()
 	balanceUnmarshaled := New()
