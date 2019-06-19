@@ -7,13 +7,13 @@ import (
 
 // region database /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-var confirmedStateDatabase database.Database
+var confirmedLedgerDatabase database.Database
 
-func configureConfirmedStateDatabase(plugin *node.Plugin) {
-	if db, err := database.Get("confirmedState"); err != nil {
+func configureConfirmedLedgerDatabase(plugin *node.Plugin) {
+	if db, err := database.Get("confirmedLedger"); err != nil {
 		panic(err)
 	} else {
-		confirmedStateDatabase = db
+		confirmedLedgerDatabase = db
 	}
 }
 
