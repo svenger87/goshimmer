@@ -9,7 +9,7 @@ import (
 var PLUGIN = node.NewPlugin("LedgerState", configure, run)
 
 func configure(plugin *node.Plugin) {
-
+	configureConfirmedLedgerDatabase(plugin)
 }
 
 func run(plugin *node.Plugin) {
