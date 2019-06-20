@@ -5,7 +5,6 @@ import (
 	"github.com/iotaledger/goshimmer/packages/database"
 	"github.com/iotaledger/goshimmer/packages/errors"
 	"github.com/iotaledger/goshimmer/packages/model/ledger/address"
-	"github.com/iotaledger/goshimmer/packages/model/value_transaction"
 	"github.com/iotaledger/goshimmer/packages/node"
 	"github.com/iotaledger/goshimmer/packages/ternary"
 )
@@ -34,8 +33,8 @@ func storeAddressEntryInDatabase(entry *address.Entry) errors.IdentifiableError 
 	return nil
 }
 
-func getAddressEntryFromDatabase(addressShard ternary.Trytes) (*address.Entry, errors.IdentifiableError) {
-	txData, err := transactionDatabase.Get(transactionHash.CastToBytes())
+func getAddressEntryFromDatabase(addressShard ternary.Trytes) (addressEntry *address.Entry, e errors.IdentifiableError) {
+	addressEntryData, err := confirmedLedgerDatabase.Get(addressShard.CastToBytes())
 	if err != nil {
 		if err == badger.ErrKeyNotFound {
 			return nil, nil
@@ -43,16 +42,20 @@ func getAddressEntryFromDatabase(addressShard ternary.Trytes) (*address.Entry, e
 			return nil, ErrDatabaseError.Derive(err, "failed to retrieve transaction")
 		}
 	}
-
-	return value_transaction.FromBytes(txData), nil
+	addressEntry = address.New(addressShard)
+	e = addressEntry.Unmarshal(addressEntryData)
+	if e != nil {
+		return nil, e
+	}
+	return addressEntry, e
 }
 
-// func databaseContainsAddressEntry(transactionHash ternary.Trytes) (bool, errors.IdentifiableError) {
-// 	if contains, err := transactionDatabase.Contains(transactionHash.CastToBytes()); err != nil {
-// 		return contains, ErrDatabaseError.Derive(err, "failed to check if the transaction exists")
-// 	} else {
-// 		return contains, nil
-// 	}
-// }
+func databaseContainsAddressEntry(addressShard ternary.Trytes) (bool, errors.IdentifiableError) {
+	if contains, err := confirmedLedgerDatabase.Contains(addressShard.CastToBytes()); err != nil {
+		return contains, ErrDatabaseError.Derive(err, "failed to check if the transaction exists")
+	} else {
+		return contains, nil
+	}
+}
 
 // endregion ///////////////////////////////////////////////////////////////////////////////////////////////////////////
