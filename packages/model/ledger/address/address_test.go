@@ -1,6 +1,7 @@
 package address
 
 import (
+	//"fmt"
 	"fmt"
 	"testing"
 
@@ -10,20 +11,20 @@ import (
 )
 
 func TestAddress_SettersGetters(t *testing.T) {
-	address := ternary.Trytes("A9999999999999999999999999999999999999999999999999999999999999999999999999999999F")
-	shardMarker := ternary.Trytes("NPHTQORL9XKA")
+	address := ternary.Trytes("A9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999F")
+	shardMarker := ternary.Trytes("NPHTQORL9XK")
 	addressShard := New(address + shardMarker)
 
 	balanceEntries := []*balance.Entry{balance.NewValue(100, 1), balance.NewValue(100, 2)}
 
 	addressShard.Add(balanceEntries...)
-	assert.Equal(t, addressShard.GetAddressShard(), address, "AddressShard")
+	assert.Equal(t, addressShard.GetAddressShard(), address+shardMarker, "AddressShard")
 	assert.Equal(t, addressShard.GetBalance(), int64(200), "Accumulated")
 }
 
 func TestBalance_MarshalUnmarshalGetters(t *testing.T) {
-	address := ternary.Trytes("A9999999999999999999999999999999999999999999999999999999999999999999999999999999F")
-	shardMarker := ternary.Trytes("NPHTQORL9XKA")
+	address := ternary.Trytes("A9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999F")
+	shardMarker := ternary.Trytes("NPHTQORL9XK")
 	addressShard := New(address + shardMarker)
 
 	balanceEntries := []*balance.Entry{balance.NewValue(100, 1), balance.NewValue(100, 2)}
@@ -31,7 +32,7 @@ func TestBalance_MarshalUnmarshalGetters(t *testing.T) {
 	addressShard.Add(balanceEntries...)
 
 	addressShardByte := addressShard.Marshal()
-	addressShardUnmarshaled := &Entry{}
+	var addressShardUnmarshaled Entry
 	err := addressShardUnmarshaled.Unmarshal(addressShardByte)
 	if err != nil {
 		fmt.Println(err, len(addressShardByte))

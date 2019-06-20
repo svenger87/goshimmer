@@ -18,7 +18,7 @@ func TestBalance_MarshalUnmarshalGetters(t *testing.T) {
 	balance := NewValue(int64(^uint64(0)>>1), ^uint64(0))
 
 	balanceByte := balance.Marshal()
-	balanceUnmarshaled := New()
+	var balanceUnmarshaled Entry
 	err := balanceUnmarshaled.Unmarshal(balanceByte)
 	if err != nil {
 		fmt.Println(err, len(balanceByte))

@@ -42,7 +42,8 @@ func getAddressEntryFromDatabase(addressShard ternary.Trytes) (addressEntry *add
 			return nil, ErrDatabaseError.Derive(err, "failed to retrieve transaction")
 		}
 	}
-	addressEntry = address.New(addressShard)
+
+	addressEntry = &address.Entry{}
 	e = addressEntry.Unmarshal(addressEntryData)
 	if e != nil {
 		return nil, e
