@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	"github.com/iotaledger/goshimmer/packages/errors"
-	"github.com/iotaledger/goshimmer/packages/model/balance"
+	"github.com/iotaledger/goshimmer/packages/model/ledger/balance"
 	"github.com/iotaledger/goshimmer/packages/ternary"
 	"github.com/iotaledger/goshimmer/packages/typeutils"
 )
@@ -40,10 +40,13 @@ func (addressEntry *Entry) GetBalance() (result int64) {
 }
 
 func (addressEntry *Entry) GetModified() bool {
-	return true
+	addressEntry.historyMutex.RLock()
+	defer addressEntry.historyMutex.RUnlock()
+	return addressEntry.modified
 }
 
 func (addressEntry *Entry) SetModified(modified bool) {
+	addressEntry.modified = modified
 }
 
 func (addressEntry *Entry) Add(balanceEntries ...*balance.Entry) {
@@ -112,11 +115,3 @@ func (addressEntry *Entry) Unmarshal(data []byte) (err errors.IdentifiableError)
 	addressEntry.historyMutex.Unlock()
 	return
 }
-
-// func getAddressFromDatabase(addressShard ternary.Trytes) (*Entry, errors.IdentifiableError) {
-// 	return nil, nil
-// }
-
-// func databaseContainsAddress(addressShard ternary.Trytes) (bool, errors.IdentifiableError) {
-// 	return false, nil
-// }

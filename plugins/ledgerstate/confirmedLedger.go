@@ -1,8 +1,13 @@
 package ledgerstate
 
 import (
+	"github.com/dgraph-io/badger"
 	"github.com/iotaledger/goshimmer/packages/database"
+	"github.com/iotaledger/goshimmer/packages/errors"
+	"github.com/iotaledger/goshimmer/packages/model/ledger/address"
+	"github.com/iotaledger/goshimmer/packages/model/value_transaction"
 	"github.com/iotaledger/goshimmer/packages/node"
+	"github.com/iotaledger/goshimmer/packages/ternary"
 )
 
 // region database /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -17,32 +22,32 @@ func configureConfirmedLedgerDatabase(plugin *node.Plugin) {
 	}
 }
 
-// func storeTransactionInDatabase(transaction *value_transaction.ValueTransaction) errors.IdentifiableError {
-// 	if transaction.GetModified() {
-// 		if err := transactionDatabase.Set(transaction.GetHash().CastToBytes(), transaction.MetaTransaction.GetBytes()); err != nil {
-// 			return ErrDatabaseError.Derive(err, "failed to store transaction")
-// 		}
+func storeAddressEntryInDatabase(entry *address.Entry) errors.IdentifiableError {
+	if entry.GetModified() {
+		if err := confirmedLedgerDatabase.Set(entry.GetAddressShard().CastToBytes(), entry.Marshal()); err != nil {
+			return ErrDatabaseError.Derive(err, "failed to store address entry")
+		}
 
-// 		transaction.SetModified(false)
-// 	}
+		entry.SetModified(false)
+	}
 
-// 	return nil
-// }
+	return nil
+}
 
-// func getTransactionFromDatabase(transactionHash ternary.Trytes) (*value_transaction.ValueTransaction, errors.IdentifiableError) {
-// 	txData, err := transactionDatabase.Get(transactionHash.CastToBytes())
-// 	if err != nil {
-// 		if err == badger.ErrKeyNotFound {
-// 			return nil, nil
-// 		} else {
-// 			return nil, ErrDatabaseError.Derive(err, "failed to retrieve transaction")
-// 		}
-// 	}
+func getAddressEntryFromDatabase(addressShard ternary.Trytes) (*address.Entry, errors.IdentifiableError) {
+	txData, err := transactionDatabase.Get(transactionHash.CastToBytes())
+	if err != nil {
+		if err == badger.ErrKeyNotFound {
+			return nil, nil
+		} else {
+			return nil, ErrDatabaseError.Derive(err, "failed to retrieve transaction")
+		}
+	}
 
-// 	return value_transaction.FromBytes(txData), nil
-// }
+	return value_transaction.FromBytes(txData), nil
+}
 
-// func databaseContainsTransaction(transactionHash ternary.Trytes) (bool, errors.IdentifiableError) {
+// func databaseContainsAddressEntry(transactionHash ternary.Trytes) (bool, errors.IdentifiableError) {
 // 	if contains, err := transactionDatabase.Contains(transactionHash.CastToBytes()); err != nil {
 // 		return contains, ErrDatabaseError.Derive(err, "failed to check if the transaction exists")
 // 	} else {

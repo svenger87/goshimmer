@@ -1,6 +1,6 @@
 package address
 
-import "github.com/iotaledger/goshimmer/packages/model/balance"
+import "github.com/iotaledger/goshimmer/packages/model/ledger/balance"
 
 const (
 	MARSHALED_ENTRY_HISTORY_COUNT_START = 0
