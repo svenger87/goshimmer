@@ -37,13 +37,13 @@ func New() (result *ValueTransaction) {
 func FromMetaTransaction(metaTransaction *meta_transaction.MetaTransaction) *ValueTransaction {
 	return &ValueTransaction{
 		MetaTransaction: metaTransaction,
-		trits: metaTransaction.GetData(),
+		trits:           metaTransaction.GetData(),
 	}
 }
 
 func FromBytes(bytes []byte) (result *ValueTransaction) {
 	result = &ValueTransaction{
-		MetaTransaction: meta_transaction.FromTrits(ternary.BytesToTrits(bytes)[:meta_transaction.MARSHALLED_TOTAL_SIZE]),
+		MetaTransaction: meta_transaction.FromTrits(ternary.BytesToTrits(bytes)[:meta_transaction.MARSHALED_TOTAL_SIZE]),
 	}
 
 	result.trits = result.MetaTransaction.GetData()
@@ -190,6 +190,26 @@ func (this *ValueTransaction) SetTimestamp(timestamp uint) bool {
 	}
 
 	return false
+}
+
+func (this *ValueTransaction) GetBundleEssence() (result ternary.Trits) {
+	this.addressMutex.RLock()
+	this.valueMutex.RLock()
+	this.signatureMessageFragmentMutex.RLock()
+
+	result = make(ternary.Trits, BUNDLE_ESSENCE_SIZE)
+
+	copy(result[0:], this.trits[ADDRESS_OFFSET:VALUE_END])
+
+	if this.GetValue() < 0 {
+		copy(result[:VALUE_END], this.trits[SIGNATURE_MESSAGE_FRAGMENT_OFFSET:SIGNATURE_MESSAGE_FRAGMENT_END])
+	}
+
+	this.signatureMessageFragmentMutex.RUnlock()
+	this.valueMutex.RUnlock()
+	this.addressMutex.RUnlock()
+
+	return
 }
 
 // getter for the nonce (supports concurrency)
