@@ -7,26 +7,27 @@ import (
 
 	"github.com/iotaledger/goshimmer/packages/errors"
 	"github.com/iotaledger/goshimmer/packages/model/ledger/balance"
-	"github.com/iotaledger/goshimmer/packages/ternary"
 	"github.com/iotaledger/goshimmer/packages/typeutils"
+	"github.com/iotaledger/goshimmer/packages/unsafeconvert"
+	"github.com/iotaledger/iota.go/trinary"
 )
 
 type Entry struct {
-	addressShard ternary.Trytes
+	addressShard trinary.Trytes
 	accumulated  int64
 	history      []*balance.Entry
 	historyMutex sync.RWMutex
 	modified     bool
 }
 
-func New(addressShard ternary.Trytes) *Entry {
+func New(addressShard trinary.Trytes) *Entry {
 	return &Entry{
 		addressShard: addressShard,
 		modified:     false,
 	}
 }
 
-func (addressEntry *Entry) GetAddressShard() (result ternary.Trytes) {
+func (addressEntry *Entry) GetAddressShard() (result trinary.Trytes) {
 	result = addressEntry.addressShard
 	return
 }
@@ -70,7 +71,7 @@ func (addressEntry *Entry) Marshal() (result []byte) {
 
 	binary.BigEndian.PutUint64(result[MARSHALED_ENTRY_ACCUMULATED_START:MARSHALED_ENTRY_ACCUMULATED_END], uint64(addressEntry.accumulated))
 
-	copy(result[MARSHALED_ENTRY_ADDRESS_START:MARSHALED_ENTRY_ADDRESS_END], addressEntry.addressShard.CastToBytes())
+	copy(result[MARSHALED_ENTRY_ADDRESS_START:MARSHALED_ENTRY_ADDRESS_END], unsafeconvert.StringToBytes(addressEntry.addressShard))
 
 	i := 0
 	for _, balanceEntry := range addressEntry.history {
@@ -101,7 +102,7 @@ func (addressEntry *Entry) Unmarshal(data []byte) (err errors.IdentifiableError)
 
 	addressEntry.historyMutex.Lock()
 
-	addressEntry.addressShard = ternary.Trytes(typeutils.BytesToString(data[MARSHALED_ENTRY_ADDRESS_START:MARSHALED_ENTRY_ADDRESS_END]))
+	addressEntry.addressShard = trinary.Trytes(typeutils.BytesToString(data[MARSHALED_ENTRY_ADDRESS_START:MARSHALED_ENTRY_ADDRESS_END]))
 	addressEntry.accumulated = int64(binary.BigEndian.Uint64(data[MARSHALED_ENTRY_ACCUMULATED_START:MARSHALED_ENTRY_ACCUMULATED_END]))
 	addressEntry.history = make([]*balance.Entry, balancesCount)
 	for i := uint64(0); i < balancesCount; i++ {

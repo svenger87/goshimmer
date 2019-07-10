@@ -6,7 +6,8 @@ import (
 	"github.com/iotaledger/goshimmer/packages/errors"
 	"github.com/iotaledger/goshimmer/packages/model/ledger/address"
 	"github.com/iotaledger/goshimmer/packages/node"
-	"github.com/iotaledger/goshimmer/packages/ternary"
+	"github.com/iotaledger/goshimmer/packages/unsafeconvert"
+	"github.com/iotaledger/iota.go/trinary"
 )
 
 // region database /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -23,7 +24,7 @@ func configureConfirmedLedgerDatabase(plugin *node.Plugin) {
 
 func storeAddressEntryInDatabase(entry *address.Entry) errors.IdentifiableError {
 	if entry.GetModified() {
-		if err := confirmedLedgerDatabase.Set(entry.GetAddressShard().CastToBytes(), entry.Marshal()); err != nil {
+		if err := confirmedLedgerDatabase.Set(unsafeconvert.StringToBytes(entry.GetAddressShard()), entry.Marshal()); err != nil {
 			return ErrDatabaseError.Derive(err, "failed to store address entry")
 		}
 
@@ -33,8 +34,8 @@ func storeAddressEntryInDatabase(entry *address.Entry) errors.IdentifiableError 
 	return nil
 }
 
-func getAddressEntryFromDatabase(addressShard ternary.Trytes) (addressEntry *address.Entry, e errors.IdentifiableError) {
-	addressEntryData, err := confirmedLedgerDatabase.Get(addressShard.CastToBytes())
+func getAddressEntryFromDatabase(addressShard trinary.Trytes) (addressEntry *address.Entry, e errors.IdentifiableError) {
+	addressEntryData, err := confirmedLedgerDatabase.Get(unsafeconvert.StringToBytes(addressShard))
 	if err != nil {
 		if err == badger.ErrKeyNotFound {
 			return nil, nil
@@ -51,8 +52,8 @@ func getAddressEntryFromDatabase(addressShard ternary.Trytes) (addressEntry *add
 	return addressEntry, e
 }
 
-func databaseContainsAddressEntry(addressShard ternary.Trytes) (bool, errors.IdentifiableError) {
-	if contains, err := confirmedLedgerDatabase.Contains(addressShard.CastToBytes()); err != nil {
+func databaseContainsAddressEntry(addressShard trinary.Trytes) (bool, errors.IdentifiableError) {
+	if contains, err := confirmedLedgerDatabase.Contains(unsafeconvert.StringToBytes(addressShard)); err != nil {
 		return contains, ErrDatabaseError.Derive(err, "failed to check if the transaction exists")
 	} else {
 		return contains, nil
