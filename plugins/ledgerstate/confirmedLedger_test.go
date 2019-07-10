@@ -20,7 +20,7 @@ func TestConfirmedLedgerDB(t *testing.T) {
 
 	addressShard.Add(balanceEntries...)
 
-	err := storeAddressEntryInDatabase(addressShard)
+	err := storeEntryInDatabase(addressShard)
 	if err != nil {
 		t.Error(err)
 	}
