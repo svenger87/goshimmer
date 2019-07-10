@@ -6,17 +6,18 @@ import (
 
 	"github.com/iotaledger/goshimmer/packages/bitutils"
 	"github.com/iotaledger/goshimmer/packages/errors"
-	"github.com/iotaledger/goshimmer/packages/ternary"
 	"github.com/iotaledger/goshimmer/packages/typeutils"
+	"github.com/iotaledger/goshimmer/packages/unsafeconvert"
+	"github.com/iotaledger/iota.go/trinary"
 )
 
 // region type definition and constructor //////////////////////////////////////////////////////////////////////////////
 
 type TransactionMetadata struct {
-	hash                ternary.Trytes
+	hash                trinary.Trytes
 	hashMutex           sync.RWMutex
-	bundleTailHash      ternary.Trytes
-	bundleTailHashMutex sync.RWMutex
+	bundleHeadHash      trinary.Trytes
+	bundleHeadHashMutex sync.RWMutex
 	receivedTime        time.Time
 	receivedTimeMutex   sync.RWMutex
 	solid               bool
@@ -29,7 +30,7 @@ type TransactionMetadata struct {
 	modifiedMutex       sync.RWMutex
 }
 
-func New(hash ternary.Trytes) *TransactionMetadata {
+func New(hash trinary.Trytes) *TransactionMetadata {
 	return &TransactionMetadata{
 		hash:         hash,
 		receivedTime: time.Now(),
@@ -44,14 +45,14 @@ func New(hash ternary.Trytes) *TransactionMetadata {
 
 // region getters and setters //////////////////////////////////////////////////////////////////////////////////////////
 
-func (metadata *TransactionMetadata) GetHash() ternary.Trytes {
+func (metadata *TransactionMetadata) GetHash() trinary.Trytes {
 	metadata.hashMutex.RLock()
 	defer metadata.hashMutex.RUnlock()
 
 	return metadata.hash
 }
 
-func (metadata *TransactionMetadata) SetHash(hash ternary.Trytes) {
+func (metadata *TransactionMetadata) SetHash(hash trinary.Trytes) {
 	metadata.hashMutex.RLock()
 	if metadata.hash != hash {
 		metadata.hashMutex.RUnlock()
@@ -67,26 +68,26 @@ func (metadata *TransactionMetadata) SetHash(hash ternary.Trytes) {
 	}
 }
 
-func (metadata *TransactionMetadata) GetBundleTailHash() ternary.Trytes {
-	metadata.bundleTailHashMutex.RLock()
-	defer metadata.bundleTailHashMutex.RUnlock()
+func (metadata *TransactionMetadata) GetBundleHeadHash() trinary.Trytes {
+	metadata.bundleHeadHashMutex.RLock()
+	defer metadata.bundleHeadHashMutex.RUnlock()
 
-	return metadata.bundleTailHash
+	return metadata.bundleHeadHash
 }
 
-func (metadata *TransactionMetadata) SetBundleTailHash(bundleTailHash ternary.Trytes) {
-	metadata.bundleTailHashMutex.RLock()
-	if metadata.bundleTailHash != bundleTailHash {
-		metadata.bundleTailHashMutex.RUnlock()
-		metadata.bundleTailHashMutex.Lock()
-		defer metadata.bundleTailHashMutex.Unlock()
-		if metadata.bundleTailHash != bundleTailHash {
-			metadata.bundleTailHash = bundleTailHash
+func (metadata *TransactionMetadata) SetBundleHeadHash(bundleTailHash trinary.Trytes) {
+	metadata.bundleHeadHashMutex.RLock()
+	if metadata.bundleHeadHash != bundleTailHash {
+		metadata.bundleHeadHashMutex.RUnlock()
+		metadata.bundleHeadHashMutex.Lock()
+		defer metadata.bundleHeadHashMutex.Unlock()
+		if metadata.bundleHeadHash != bundleTailHash {
+			metadata.bundleHeadHash = bundleTailHash
 
 			metadata.SetModified(true)
 		}
 	} else {
-		metadata.bundleTailHashMutex.RUnlock()
+		metadata.bundleHeadHashMutex.RUnlock()
 	}
 }
 
@@ -218,7 +219,7 @@ func (metadata *TransactionMetadata) Marshal() ([]byte, errors.IdentifiableError
 	metadata.finalizedMutex.RLock()
 	defer metadata.finalizedMutex.RUnlock()
 
-	copy(marshaledMetadata[MARSHALED_HASH_START:MARSHALED_HASH_END], metadata.hash.CastToBytes())
+	copy(marshaledMetadata[MARSHALED_HASH_START:MARSHALED_HASH_END], unsafeconvert.StringToBytes(metadata.hash))
 
 	marshaledReceivedTime, err := metadata.receivedTime.MarshalBinary()
 	if err != nil {
@@ -253,7 +254,7 @@ func (metadata *TransactionMetadata) Unmarshal(data []byte) errors.IdentifiableE
 	metadata.finalizedMutex.Lock()
 	defer metadata.finalizedMutex.Unlock()
 
-	metadata.hash = ternary.Trytes(typeutils.BytesToString(data[MARSHALED_HASH_START:MARSHALED_HASH_END]))
+	metadata.hash = trinary.Trytes(typeutils.BytesToString(data[MARSHALED_HASH_START:MARSHALED_HASH_END]))
 
 	if err := metadata.receivedTime.UnmarshalBinary(data[MARSHALED_RECEIVED_TIME_START:MARSHALED_RECEIVED_TIME_END]); err != nil {
 		return ErrUnmarshalFailed.Derive(err, "could not unmarshal the received time")
