@@ -12,9 +12,9 @@ import (
 func TestConfirmedLedgerDB(t *testing.T) {
 	configureConfirmedLedgerDatabase(nil)
 
-	addr := trinary.Trytes("A999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999F")
-	shardMarker := trinary.Trytes("NPHTQORL9XKA")
-	addressShard := address.New(addr + shardMarker)
+	addr := trinary.Trytes("A9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999F")
+	shardMarker := trinary.Trytes("NPHTQORL9XK")
+	addressShard := address.New(addr, shardMarker)
 
 	balanceEntries := []*balance.Entry{balance.NewValue(100, 1), balance.NewValue(100, 2)}
 
@@ -24,11 +24,12 @@ func TestConfirmedLedgerDB(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	addressShardFromDB, err := getAddressEntryFromDatabase(addressShard.GetAddressShard())
+	addressShardFromDB, err := getAddressEntryFromDatabase(addressShard.GetAddress() + addressShard.GetShard())
 	if err != nil {
 		t.Error(err)
 	}
 
-	assert.Equal(t, addressShardFromDB.GetAddressShard(), addressShard.GetAddressShard(), "AddressShard")
+	assert.Equal(t, addressShardFromDB.GetAddress(), addressShard.GetAddress(), "Address")
+	assert.Equal(t, addressShardFromDB.GetShard(), addressShard.GetShard(), "Shard")
 	assert.Equal(t, addressShardFromDB.GetBalance(), addressShard.GetBalance(), "Accumulated")
 }

@@ -24,7 +24,7 @@ func configureConfirmedLedgerDatabase(plugin *node.Plugin) {
 
 func storeAddressEntryInDatabase(entry *address.Entry) errors.IdentifiableError {
 	if entry.GetModified() {
-		if err := confirmedLedgerDatabase.Set(unsafeconvert.StringToBytes(entry.GetAddressShard()), entry.Marshal()); err != nil {
+		if err := confirmedLedgerDatabase.Set(unsafeconvert.StringToBytes(entry.GetAddress()+entry.GetShard()), entry.Marshal()); err != nil {
 			return ErrDatabaseError.Derive(err, "failed to store address entry")
 		}
 

@@ -13,19 +13,20 @@ import (
 func TestAddress_SettersGetters(t *testing.T) {
 	address := trinary.Trytes("A9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999F")
 	shardMarker := trinary.Trytes("NPHTQORL9XK")
-	addressShard := New(address + shardMarker)
+	addressShard := New(address, shardMarker)
 
 	balanceEntries := []*balance.Entry{balance.NewValue(100, 1), balance.NewValue(100, 2)}
 
 	addressShard.Add(balanceEntries...)
-	assert.Equal(t, addressShard.GetAddressShard(), address+shardMarker, "AddressShard")
+	assert.Equal(t, addressShard.GetAddress(), address, "Address")
+	assert.Equal(t, addressShard.GetShard(), shardMarker, "Shard")
 	assert.Equal(t, addressShard.GetBalance(), int64(200), "Accumulated")
 }
 
 func TestBalance_MarshalUnmarshalGetters(t *testing.T) {
 	address := trinary.Trytes("A9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999F")
 	shardMarker := trinary.Trytes("NPHTQORL9XK")
-	addressShard := New(address + shardMarker)
+	addressShard := New(address, shardMarker)
 
 	balanceEntries := []*balance.Entry{balance.NewValue(100, 1), balance.NewValue(100, 2)}
 
@@ -38,6 +39,7 @@ func TestBalance_MarshalUnmarshalGetters(t *testing.T) {
 		fmt.Println(err, len(addressShardByte))
 	}
 
-	assert.Equal(t, addressShardUnmarshaled.GetAddressShard(), addressShard.GetAddressShard(), "AddressShard")
+	assert.Equal(t, addressShardUnmarshaled.GetAddress(), addressShard.GetAddress(), "Address")
+	assert.Equal(t, addressShardUnmarshaled.GetShard(), addressShard.GetShard(), "Shard")
 	assert.Equal(t, addressShardUnmarshaled.GetBalance(), addressShard.GetBalance(), "Accumulated")
 }

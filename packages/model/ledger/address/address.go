@@ -13,22 +13,29 @@ import (
 )
 
 type Entry struct {
-	addressShard trinary.Trytes
+	address      trinary.Trytes
+	shard        trinary.Trytes
 	accumulated  int64
 	history      []*balance.Entry
 	historyMutex sync.RWMutex
 	modified     bool
 }
 
-func New(addressShard trinary.Trytes) *Entry {
+func New(address, shard trinary.Trytes) *Entry {
 	return &Entry{
-		addressShard: addressShard,
-		modified:     false,
+		address:  address,
+		shard:    shard,
+		modified: false,
 	}
 }
 
-func (addressEntry *Entry) GetAddressShard() (result trinary.Trytes) {
-	result = addressEntry.addressShard
+func (addressEntry *Entry) GetAddress() (result trinary.Trytes) {
+	result = addressEntry.address
+	return
+}
+
+func (addressEntry *Entry) GetShard() (result trinary.Trytes) {
+	result = addressEntry.shard
 	return
 }
 
@@ -71,7 +78,8 @@ func (addressEntry *Entry) Marshal() (result []byte) {
 
 	binary.BigEndian.PutUint64(result[MARSHALED_ENTRY_ACCUMULATED_START:MARSHALED_ENTRY_ACCUMULATED_END], uint64(addressEntry.accumulated))
 
-	copy(result[MARSHALED_ENTRY_ADDRESS_START:MARSHALED_ENTRY_ADDRESS_END], unsafeconvert.StringToBytes(addressEntry.addressShard))
+	copy(result[MARSHALED_ENTRY_ADDRESS_START:MARSHALED_ENTRY_ADDRESS_END], unsafeconvert.StringToBytes(addressEntry.address))
+	copy(result[MARSHALED_ENTRY_SHARD_START:MARSHALED_ENTRY_SHARD_END], unsafeconvert.StringToBytes(addressEntry.shard))
 
 	i := 0
 	for _, balanceEntry := range addressEntry.history {
@@ -102,7 +110,8 @@ func (addressEntry *Entry) Unmarshal(data []byte) (err errors.IdentifiableError)
 
 	addressEntry.historyMutex.Lock()
 
-	addressEntry.addressShard = trinary.Trytes(typeutils.BytesToString(data[MARSHALED_ENTRY_ADDRESS_START:MARSHALED_ENTRY_ADDRESS_END]))
+	addressEntry.address = trinary.Trytes(typeutils.BytesToString(data[MARSHALED_ENTRY_ADDRESS_START:MARSHALED_ENTRY_ADDRESS_END]))
+	addressEntry.shard = trinary.Trytes(typeutils.BytesToString(data[MARSHALED_ENTRY_SHARD_START:MARSHALED_ENTRY_SHARD_END]))
 	addressEntry.accumulated = int64(binary.BigEndian.Uint64(data[MARSHALED_ENTRY_ACCUMULATED_START:MARSHALED_ENTRY_ACCUMULATED_END]))
 	addressEntry.history = make([]*balance.Entry, balancesCount)
 	for i := uint64(0); i < balancesCount; i++ {
