@@ -33,3 +33,26 @@ func TestConfirmedLedgerDB(t *testing.T) {
 	assert.Equal(t, addressShardFromDB.GetShard(), addressShard.GetShard(), "Shard")
 	assert.Equal(t, addressShardFromDB.GetBalance(), addressShard.GetBalance(), "Accumulated")
 }
+
+func TestConfirmedLedgerAPI(t *testing.T) {
+	configureConfirmedLedgerDatabase(nil)
+
+	addr := trinary.Trytes("A9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999F")
+	shardMarker := trinary.Trytes("NPHTQORL9XK")
+	addressShard := address.New(addr, shardMarker)
+
+	balanceEntries := []*balance.Entry{balance.NewValue(100, 1), balance.NewValue(100, 2)}
+
+	addressShard.Add(balanceEntries...)
+
+	StoreEntry(addressShard)
+
+	addressShardFromCache, err := GetAddressEntry(addressShard.GetAddress() + addressShard.GetShard())
+	if err != nil {
+		t.Error(err)
+	}
+
+	assert.Equal(t, addressShardFromCache.GetAddress(), addressShard.GetAddress(), "Address")
+	assert.Equal(t, addressShardFromCache.GetShard(), addressShard.GetShard(), "Shard")
+	assert.Equal(t, addressShardFromCache.GetBalance(), addressShard.GetBalance(), "Accumulated")
+}

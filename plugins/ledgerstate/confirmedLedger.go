@@ -104,7 +104,7 @@ func getAddressEntryFromDatabase(addressShard trinary.Trytes) (addressEntry *add
 		if err == badger.ErrKeyNotFound {
 			return nil, nil
 		} else {
-			return nil, ErrDatabaseError.Derive(err, "failed to retrieve transaction")
+			return nil, ErrDatabaseError.Derive(err, "failed to retrieve address entry")
 		}
 	}
 
@@ -118,7 +118,7 @@ func getAddressEntryFromDatabase(addressShard trinary.Trytes) (addressEntry *add
 
 func databaseContainsEntry(addressShard trinary.Trytes) (bool, errors.IdentifiableError) {
 	if contains, err := confirmedLedgerDatabase.Contains(unsafeconvert.StringToBytes(addressShard)); err != nil {
-		return contains, ErrDatabaseError.Derive(err, "failed to check if the transaction exists")
+		return contains, ErrDatabaseError.Derive(err, "failed to check if the address entry exists")
 	} else {
 		return contains, nil
 	}
