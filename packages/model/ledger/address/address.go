@@ -13,60 +13,67 @@ import (
 )
 
 type Entry struct {
-	address      trinary.Trytes
-	shard        trinary.Trytes
-	accumulated  int64
-	history      []*balance.Entry
-	historyMutex sync.RWMutex
-	modified     bool
+	address       trinary.Trytes
+	shard         trinary.Trytes
+	accumulated   int64
+	history       []*balance.Entry
+	historyMutex  sync.RWMutex
+	modified      bool
+	modifiedMutex sync.RWMutex
 }
 
 func New(address, shard trinary.Trytes) *Entry {
 	return &Entry{
-		address:  address,
-		shard:    shard,
-		modified: false,
+		address: address,
+		shard:   shard,
+		history: make([]*balance.Entry, 0),
 	}
 }
 
 func (addressEntry *Entry) GetAddress() (result trinary.Trytes) {
 	result = addressEntry.address
+
 	return
 }
 
 func (addressEntry *Entry) GetShard() (result trinary.Trytes) {
 	result = addressEntry.shard
+
 	return
 }
 
 func (addressEntry *Entry) GetBalance() (result int64) {
 	addressEntry.historyMutex.RLock()
-	defer addressEntry.historyMutex.RUnlock()
-
 	result = addressEntry.accumulated
+	addressEntry.historyMutex.RUnlock()
+
 	return
 }
 
-func (addressEntry *Entry) GetModified() bool {
-	addressEntry.historyMutex.RLock()
-	defer addressEntry.historyMutex.RUnlock()
-	return addressEntry.modified
+func (addressEntry *Entry) GetModified() (result bool) {
+	addressEntry.modifiedMutex.RLock()
+	result = addressEntry.modified
+	addressEntry.modifiedMutex.RUnlock()
+
+	return
 }
 
 func (addressEntry *Entry) SetModified(modified bool) {
+	addressEntry.modifiedMutex.Lock()
 	addressEntry.modified = modified
+	addressEntry.modifiedMutex.Unlock()
 }
 
 func (addressEntry *Entry) Add(balanceEntries ...*balance.Entry) {
 	addressEntry.historyMutex.Lock()
-	defer addressEntry.historyMutex.Unlock()
 
 	addressEntry.history = append(addressEntry.history, balanceEntries...)
-
 	for _, balanceEntry := range balanceEntries {
 		addressEntry.accumulated += balanceEntry.GetValue()
 	}
-	addressEntry.modified = true
+	addressEntry.SetModified(true)
+
+	addressEntry.historyMutex.Unlock()
 }
 
 func (addressEntry *Entry) Marshal() (result []byte) {
@@ -92,6 +99,7 @@ func (addressEntry *Entry) Marshal() (result []byte) {
 	}
 
 	addressEntry.historyMutex.RUnlock()
+
 	return
 }
 
@@ -123,5 +131,6 @@ func (addressEntry *Entry) Unmarshal(data []byte) (err errors.IdentifiableError)
 	}
 
 	addressEntry.historyMutex.Unlock()
+
 	return
 }
