@@ -59,7 +59,11 @@ func (this *databaseImpl) Open() error {
 		opts.ValueDir = opts.Dir
 		opts.Logger = &logger{}
 		opts.Truncate = true
-		opts.TableLoadingMode = options.MemoryMap
+
+		opts.TableLoadingMode = options.FileIO //options.MemoryMap
+		opts.ValueLogLoadingMode = options.FileIO
+		opts.MaxTableSize = 16 << 20
+		opts.NumMemtables = 1
 
 		db, err := badger.Open(opts)
 		if err != nil {

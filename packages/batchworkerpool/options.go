@@ -6,8 +6,8 @@ import (
 )
 
 var DEFAULT_OPTIONS = &Options{
-	WorkerCount:            2 * runtime.NumCPU(),
-	QueueSize:              2 * runtime.NumCPU() * 64,
+	WorkerCount:            runtime.NumCPU(),
+	QueueSize:              64,
 	BatchSize:              64,
 	BatchCollectionTimeout: 15 * time.Millisecond,
 }

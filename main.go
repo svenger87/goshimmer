@@ -1,6 +1,9 @@
 package main
 
 import (
+	"net/http"
+	_ "net/http/pprof"
+
 	"github.com/iotaledger/goshimmer/packages/node"
 	"github.com/iotaledger/goshimmer/plugins/analysis"
 	"github.com/iotaledger/goshimmer/plugins/autopeering"
@@ -20,6 +23,8 @@ import (
 )
 
 func main() {
+
+	go http.ListenAndServe("localhost:8090", nil)
 	node.Run(
 		cli.PLUGIN,
 		autopeering.PLUGIN,
