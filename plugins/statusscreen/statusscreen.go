@@ -1,6 +1,7 @@
 package statusscreen
 
 import (
+	"sync"
 	"time"
 
 	"github.com/gdamore/tcell"
@@ -12,16 +13,17 @@ import (
 
 var statusMessages = make(map[string]*StatusMessage)
 var messageLog = make([]*StatusMessage, 0)
+var mutex sync.RWMutex
 
 var app *tview.Application
 
 func configure(plugin *node.Plugin) {
-	node.DEFAULT_LOGGER.Enabled = false
+	node.DEFAULT_LOGGER.SetEnabled(false)
 
 	plugin.Node.AddLogger(DEFAULT_LOGGER)
 
 	daemon.Events.Shutdown.Attach(events.NewClosure(func() {
-		node.DEFAULT_LOGGER.Enabled = true
+		node.DEFAULT_LOGGER.SetEnabled(true)
 
 		if app != nil {
 			app.Stop()
@@ -75,6 +77,8 @@ func run(plugin *node.Plugin) {
 	})
 
 	app.SetBeforeDrawFunc(func(screen tcell.Screen) bool {
+		mutex.RLock()
+		defer mutex.RUnlock()
 		headerBar.Update()
 
 		rows := make([]int, 1)

@@ -28,7 +28,8 @@ func processIncomingRequest(plugin *node.Plugin, req *request.Request) {
 	knownpeers.INSTANCE.AddOrUpdate(req.Issuer)
 
 	if *parameters.ACCEPT_REQUESTS.Value && requestShouldBeAccepted(req) {
-		defer acceptedneighbors.INSTANCE.Lock()()
+		acceptedneighbors.INSTANCE.Lock()
+		defer acceptedneighbors.INSTANCE.Unlock()
 
 		if requestShouldBeAccepted(req) {
 			acceptedneighbors.INSTANCE.AddOrUpdate(req.Issuer, false)

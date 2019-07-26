@@ -42,6 +42,8 @@ func createOutgoingRequestProcessor(plugin *node.Plugin) func() {
 }
 
 func sendOutgoingRequests(plugin *node.Plugin) {
+	chosenneighbors.CANDIDATES_LOCK.RLock()
+	defer chosenneighbors.CANDIDATES_LOCK.RUnlock()
 	for _, chosenNeighborCandidate := range chosenneighbors.CANDIDATES.Clone() {
 		timeutil.Sleep(5 * time.Second)
 

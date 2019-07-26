@@ -7,6 +7,8 @@ import (
 )
 
 func storeStatusMessage(pluginName string, message string, logLevel int) {
+	mutex.Lock()
+	defer mutex.Unlock()
 	messageLog = append(messageLog, &StatusMessage{
 		Source:   pluginName,
 		LogLevel: logLevel,

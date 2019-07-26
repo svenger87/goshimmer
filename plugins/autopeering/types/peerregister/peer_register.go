@@ -30,15 +30,18 @@ func New() *PeerRegister {
 
 // returns true if a new entry was added
 func (this *PeerRegister) AddOrUpdate(peer *peer.Peer, lock ...bool) bool {
-	if len(lock) == 0 || lock[0] {
-		defer this.Lock()()
-	}
+	this.lock.Lock()
+	defer this.lock.Unlock()
+	// if len(lock) == 0 || lock[0] {
+	// 	defer this.Lock()()
+	// }
 
 	if peer.Identity == nil || bytes.Equal(peer.Identity.Identifier, accountability.OwnId().Identifier) {
 		return false
 	}
 
 	if existingPeer, exists := this.Peers[peer.Identity.StringIdentifier]; exists {
+		existingPeer.PeerMutex.Lock()
 		existingPeer.Address = peer.Address
 		existingPeer.GossipPort = peer.GossipPort
 		existingPeer.PeeringPort = peer.PeeringPort
@@ -50,7 +53,7 @@ func (this *PeerRegister) AddOrUpdate(peer *peer.Peer, lock ...bool) bool {
 		}
 
 		this.Events.Update.Trigger(existingPeer)
-
+		existingPeer.PeerMutex.Unlock()
 		return false
 	} else {
 		this.Peers[peer.Identity.StringIdentifier] = peer
@@ -61,18 +64,27 @@ func (this *PeerRegister) AddOrUpdate(peer *peer.Peer, lock ...bool) bool {
 	}
 }
 
-// by calling defer peerRegister.Lock()() we can auto-lock AND unlock (note: two parentheses)
-func (this *PeerRegister) Lock() func() {
+func (this *PeerRegister) Lock() {
 	this.lock.Lock()
+}
 
-	return this.lock.Unlock
+func (this *PeerRegister) Unlock() {
+	this.lock.Unlock()
+}
+
+func (this *PeerRegister) RLock() {
+	this.lock.RLock()
+}
+
+func (this *PeerRegister) RUnlock() {
+	this.lock.RUnlock()
 }
 
 func (this *PeerRegister) Remove(key string, lock ...bool) {
+	this.lock.Lock()
+	defer this.lock.Unlock()
 	if peerEntry, exists := this.Peers[key]; exists {
 		if len(lock) == 0 || lock[0] {
-			defer this.Lock()()
-
 			if peerEntry, exists := this.Peers[key]; exists {
 				delete(this.Peers, key)
 

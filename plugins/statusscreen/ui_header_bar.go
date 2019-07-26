@@ -80,9 +80,17 @@ func (headerBar *UIHeaderBar) Update() {
 
 	fmt.Fprintf(headerBar.InfoContainer, "[::b]Node ID: [::d]%40v  ", accountability.OwnId().StringIdentifier)
 	fmt.Fprintln(headerBar.InfoContainer)
+	//chosenneighbors.INSTANCE.RLock()
+	//acceptedneighbors.INSTANCE.RLock()
 	fmt.Fprintf(headerBar.InfoContainer, "[::b]Neighbors: [::d]%40v  ", strconv.Itoa(len(chosenneighbors.INSTANCE.Peers))+" chosen / "+strconv.Itoa(len(acceptedneighbors.INSTANCE.Peers))+" accepted")
+	//chosenneighbors.INSTANCE.RUnlock()
+	//acceptedneighbors.INSTANCE.RUnlock()
 	fmt.Fprintln(headerBar.InfoContainer)
+	//knownpeers.INSTANCE.RLock()
+	//neighborhood.INSTANCE.RLock()
 	fmt.Fprintf(headerBar.InfoContainer, "[::b]Known Peers: [::d]%40v  ", strconv.Itoa(len(knownpeers.INSTANCE.Peers))+" total / "+strconv.Itoa(len(neighborhood.INSTANCE.Peers))+" neighborhood")
+	//knownpeers.INSTANCE.RUnlock()
+	//neighborhood.INSTANCE.RUnlock()
 	fmt.Fprintln(headerBar.InfoContainer)
 	fmt.Fprintf(headerBar.InfoContainer, "[::b]Uptime: [::d]")
 

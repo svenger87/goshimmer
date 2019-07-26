@@ -19,13 +19,14 @@ func processIncomingResponse(plugin *node.Plugin, peeringResponse *response.Resp
 
 	peeringResponse.Issuer.Conn.Close()
 
-	knownpeers.INSTANCE.AddOrUpdate(peeringResponse.Issuer)
+	knownpeers.INSTANCE.AddOrUpdate(peeringResponse.Issuer, true)
 	for _, peer := range peeringResponse.Peers {
-		knownpeers.INSTANCE.AddOrUpdate(peer)
+		knownpeers.INSTANCE.AddOrUpdate(peer, true)
 	}
 
 	if peeringResponse.Type == response.TYPE_ACCEPT {
-		defer chosenneighbors.INSTANCE.Lock()()
+		chosenneighbors.INSTANCE.Lock()
+		defer chosenneighbors.INSTANCE.Unlock()
 
 		chosenneighbors.INSTANCE.AddOrUpdate(peeringResponse.Issuer, false)
 

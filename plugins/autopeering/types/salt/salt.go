@@ -2,6 +2,7 @@ package salt
 
 import (
 	"crypto/rand"
+	"sync"
 	"time"
 
 	"github.com/pkg/errors"
@@ -10,6 +11,7 @@ import (
 type Salt struct {
 	Bytes          []byte
 	ExpirationTime time.Time
+	mutex          sync.RWMutex
 }
 
 func New(lifetime time.Duration) *Salt {
@@ -43,6 +45,8 @@ func Unmarshal(marshaledSalt []byte) (*Salt, error) {
 }
 
 func (this *Salt) Marshal() []byte {
+	this.mutex.RLock()
+	defer this.mutex.RUnlock()
 	result := make([]byte, SALT_BYTES_SIZE+SALT_TIME_SIZE)
 
 	copy(result[SALT_BYTES_START:SALT_BYTES_END], this.Bytes)
@@ -54,4 +58,20 @@ func (this *Salt) Marshal() []byte {
 	}
 
 	return result
+}
+
+func (this *Salt) Lock() {
+	this.mutex.Lock()
+}
+
+func (this *Salt) Unlock() {
+	this.mutex.Unlock()
+}
+
+func (this *Salt) RLock() {
+	this.mutex.RLock()
+}
+
+func (this *Salt) RUnlock() {
+	this.mutex.RUnlock()
 }

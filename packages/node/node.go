@@ -53,7 +53,7 @@ func (node *Node) AddLogger(logger *Logger) {
 func (node *Node) LogSuccess(pluginName string, message string) {
 	if *LOG_LEVEL.Value >= LOG_LEVEL_SUCCESS {
 		for _, logger := range node.loggers {
-			if logger.Enabled {
+			if logger.GetEnabled() {
 				logger.LogSuccess(pluginName, message)
 			}
 		}
@@ -63,7 +63,7 @@ func (node *Node) LogSuccess(pluginName string, message string) {
 func (node *Node) LogInfo(pluginName string, message string) {
 	if *LOG_LEVEL.Value >= LOG_LEVEL_INFO {
 		for _, logger := range node.loggers {
-			if logger.Enabled {
+			if logger.GetEnabled() {
 				logger.LogInfo(pluginName, message)
 			}
 		}
@@ -73,7 +73,7 @@ func (node *Node) LogInfo(pluginName string, message string) {
 func (node *Node) LogDebug(pluginName string, message string) {
 	if *LOG_LEVEL.Value >= LOG_LEVEL_DEBUG {
 		for _, logger := range node.loggers {
-			if logger.Enabled {
+			if logger.GetEnabled() {
 				logger.LogDebug(pluginName, message)
 			}
 		}
@@ -83,7 +83,7 @@ func (node *Node) LogDebug(pluginName string, message string) {
 func (node *Node) LogWarning(pluginName string, message string) {
 	if *LOG_LEVEL.Value >= LOG_LEVEL_WARNING {
 		for _, logger := range node.loggers {
-			if logger.Enabled {
+			if logger.GetEnabled() {
 				logger.LogWarning(pluginName, message)
 			}
 		}
@@ -93,7 +93,7 @@ func (node *Node) LogWarning(pluginName string, message string) {
 func (node *Node) LogFailure(pluginName string, message string) {
 	if *LOG_LEVEL.Value >= LOG_LEVEL_FAILURE {
 		for _, logger := range node.loggers {
-			if logger.Enabled {
+			if logger.GetEnabled() {
 				logger.LogFailure(pluginName, message)
 			}
 		}

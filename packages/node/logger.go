@@ -1,6 +1,9 @@
 package node
 
-import "fmt"
+import (
+	"fmt"
+	"sync"
+)
 
 type Logger struct {
 	Enabled    bool
@@ -9,6 +12,19 @@ type Logger struct {
 	LogWarning func(pluginName string, message string)
 	LogFailure func(pluginName string, message string)
 	LogDebug   func(pluginName string, message string)
+	mutex      sync.RWMutex
+}
+
+func (logger *Logger) SetEnabled(value bool) {
+	logger.mutex.Lock()
+	logger.Enabled = value
+	logger.mutex.Unlock()
+}
+
+func (logger *Logger) GetEnabled() bool {
+	logger.mutex.RLock()
+	defer logger.mutex.RUnlock()
+	return logger.Enabled
 }
 
 func pluginPrefix(pluginName string) string {

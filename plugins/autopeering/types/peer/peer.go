@@ -27,6 +27,7 @@ type Peer struct {
 	firstSeenMutex sync.RWMutex
 	lastSeen       time.Time
 	lastSeenMutex  sync.RWMutex
+	PeerMutex      sync.RWMutex
 }
 
 func Unmarshal(data []byte) (*Peer, error) {
@@ -145,6 +146,8 @@ func (peer *Peer) Marshal() []byte {
 }
 
 func (peer *Peer) String() string {
+	peer.PeerMutex.RLock()
+	defer peer.PeerMutex.RUnlock()
 	if peer.Identity != nil {
 		return peer.Address.String() + ":" + strconv.Itoa(int(peer.PeeringPort)) + " / " + peer.Identity.StringIdentifier
 	} else {

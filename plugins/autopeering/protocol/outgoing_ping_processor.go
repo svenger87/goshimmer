@@ -56,6 +56,8 @@ func createOutgoingPingProcessor(plugin *node.Plugin) func() {
 }
 
 func pingPeers(plugin *node.Plugin, outgoingPing *ping.Ping) {
+	neighborhood.LIST_INSTANCE_LOCK.RLock()
+	defer neighborhood.LIST_INSTANCE_LOCK.RUnlock()
 	if len(neighborhood.LIST_INSTANCE) >= 1 {
 		pingDelay := constants.PING_CYCLE_LENGTH / time.Duration(len(neighborhood.LIST_INSTANCE))
 

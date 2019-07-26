@@ -1,6 +1,7 @@
 package neighborhood
 
 import (
+	"sync"
 	"time"
 
 	"github.com/iotaledger/goshimmer/packages/daemon"
@@ -16,6 +17,7 @@ import (
 var INSTANCE *peerregister.PeerRegister
 
 var LIST_INSTANCE peerlist.PeerList
+var LIST_INSTANCE_LOCK sync.RWMutex
 
 // Selects a fixed neighborhood from all known peers - this allows nodes to "stay in the same circles" that share their
 // view on the ledger an is a preparation for economic clustering
@@ -41,9 +43,17 @@ func Run(plugin *node.Plugin) {
 }
 
 func updateNeighborHood() {
+	if INSTANCE != nil {
+		INSTANCE.Lock()
+		defer INSTANCE.Unlock()
+	}
+	knownpeers.INSTANCE.Lock()
+	defer knownpeers.INSTANCE.Unlock()
 	if INSTANCE == nil || float64(len(INSTANCE.Peers))*1.2 <= float64(len(knownpeers.INSTANCE.Peers)) || lastUpdate.Before(time.Now().Add(-300*time.Second)) {
 		INSTANCE = knownpeers.INSTANCE.Filter(NEIGHBORHOOD_SELECTOR, outgoingrequest.INSTANCE)
+		LIST_INSTANCE_LOCK.Lock()
 		LIST_INSTANCE = INSTANCE.List()
+		LIST_INSTANCE_LOCK.Unlock()
 
 		lastUpdate = time.Now()
 

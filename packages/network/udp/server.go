@@ -3,6 +3,7 @@ package udp
 import (
 	"net"
 	"strconv"
+	"sync"
 
 	"github.com/iotaledger/goshimmer/packages/events"
 )
@@ -11,15 +12,24 @@ type Server struct {
 	Socket            net.PacketConn
 	ReceiveBufferSize int
 	Events            serverEvents
+	mutex             sync.RWMutex
 }
 
 func (this *Server) Shutdown() {
+	this.mutex.Lock()
+	defer this.mutex.Unlock()
 	if this.Socket != nil {
 		socket := this.Socket
 		this.Socket = nil
 
 		socket.Close()
 	}
+}
+
+func (this *Server) GetSocket() net.PacketConn {
+	this.mutex.RLock()
+	defer this.mutex.RUnlock()
+	return this.Socket
 }
 
 func (this *Server) Listen(address string, port int) {
@@ -35,9 +45,10 @@ func (this *Server) Listen(address string, port int) {
 	defer this.Events.Shutdown.Trigger()
 
 	buf := make([]byte, this.ReceiveBufferSize)
-	for this.Socket != nil {
-		if bytesRead, addr, err := this.Socket.ReadFrom(buf); err != nil {
-			if this.Socket != nil {
+	for this.GetSocket() != nil {
+		s := this.GetSocket()
+		if bytesRead, addr, err := s.ReadFrom(buf); err != nil {
+			if this.GetSocket() != nil {
 				this.Events.Error.Trigger(err)
 			}
 		} else {

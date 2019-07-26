@@ -20,7 +20,7 @@ var workerPool = workerpool.New(func(task workerpool.Task) {
 	task.Return(nil)
 }, workerpool.WorkerCount(WORKER_COUNT), workerpool.QueueSize(2*WORKER_COUNT))
 
-const WORKER_COUNT = 10000
+const WORKER_COUNT = 1 //0000
 
 func ProcessSolidBundleHead(headTransaction *value_transaction.ValueTransaction) errors.IdentifiableError {
 	// only process the bundle if we didn't process it, yet

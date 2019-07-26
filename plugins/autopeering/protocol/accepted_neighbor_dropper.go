@@ -15,8 +15,9 @@ import (
 func createAcceptedNeighborDropper(plugin *node.Plugin) func() {
 	return func() {
 		timeutil.Ticker(func() {
+			acceptedneighbors.INSTANCE.Lock()
+			defer acceptedneighbors.INSTANCE.Unlock()
 			if len(acceptedneighbors.INSTANCE.Peers) > constants.NEIGHBOR_COUNT/2 {
-				defer acceptedneighbors.INSTANCE.Lock()()
 				for len(acceptedneighbors.INSTANCE.Peers) > constants.NEIGHBOR_COUNT/2 {
 					acceptedneighbors.FurthestNeighborLock.RLock()
 					furthestNeighbor := acceptedneighbors.FURTHEST_NEIGHBOR

@@ -48,10 +48,13 @@ func getSalt(key []byte, lifetime time.Duration) *salt.Salt {
 }
 
 func updatePublicSalt(saltToUpdate *salt.Salt, settingsKey []byte, lifeSpan time.Duration, updateCallback func(params ...interface{})) {
+
 	newSalt := salt.New(lifeSpan)
 
+	saltToUpdate.Lock()
 	saltToUpdate.Bytes = newSalt.Bytes
 	saltToUpdate.ExpirationTime = newSalt.ExpirationTime
+	saltToUpdate.Unlock()
 
 	if err := settings.Set(settingsKey, saltToUpdate.Marshal()); err != nil {
 		panic(err)
