@@ -53,7 +53,7 @@ func (this *Server) Listen(port int) *Server {
 			}
 		} else {
 			peer := network.NewManagedConnection(socket)
-
+			//TODO: check this
 			go this.Events.Connect.Trigger(peer)
 		}
 	}

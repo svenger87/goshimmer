@@ -28,6 +28,7 @@ func createAcceptedNeighborDropper(plugin *node.Plugin) func() {
 						dropMessage.Sign()
 
 						acceptedneighbors.INSTANCE.Remove(furthestNeighbor.Identity.StringIdentifier, false)
+						//TODO: checkThis
 						go func() {
 							if _, err := furthestNeighbor.Send(dropMessage.Marshal(), types.PROTOCOL_TYPE_UDP, false); err != nil {
 								plugin.LogDebug("error when sending drop message to" + acceptedneighbors.FURTHEST_NEIGHBOR.String())

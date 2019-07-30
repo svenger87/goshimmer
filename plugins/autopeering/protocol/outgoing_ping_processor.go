@@ -73,6 +73,7 @@ func pingPeers(plugin *node.Plugin, outgoingPing *ping.Ping) {
 			}
 
 			for _, chosenPeer := range chosenPeers {
+				//TODO: add workerPool
 				go func(chosenPeer *peer.Peer) {
 					if _, err := chosenPeer.Send(outgoingPing.Marshal(), types.PROTOCOL_TYPE_UDP, false); err != nil {
 						plugin.LogDebug("error when sending ping to " + chosenPeer.String() + ": " + err.Error())
