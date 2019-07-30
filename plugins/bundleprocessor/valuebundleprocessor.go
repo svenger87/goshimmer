@@ -16,7 +16,7 @@ var valueBundleProcessorWorkerPool = workerpool.New(func(task workerpool.Task) {
 	}
 
 	task.Return(nil)
-}, workerpool.WorkerCount(WORKER_COUNT), workerpool.QueueSize(2*WORKER_COUNT))
+}, workerpool.WorkerCount(WORKER_COUNT), workerpool.QueueSize(WORKER_COUNT))
 
 func ProcessSolidValueBundle(bundle *bundle.Bundle, bundleTransactions []*value_transaction.ValueTransaction) errors.IdentifiableError {
 	bundle.SetBundleEssenceHash(CalculateBundleHash(bundleTransactions))
