@@ -90,7 +90,7 @@ func (wp *BatchWorkerPool) StopAndWait() {
 
 func (wp *BatchWorkerPool) resetChannels() {
 	wp.calls = make(chan Task, wp.options.QueueSize)
-	wp.batchedCalls = make(chan []Task, wp.options.WorkerCount)
+	wp.batchedCalls = make(chan []Task, 2*wp.options.WorkerCount)
 	wp.terminate = make(chan int, 1)
 }
 

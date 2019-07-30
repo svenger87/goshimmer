@@ -5,8 +5,8 @@ import (
 )
 
 var DEFAULT_OPTIONS = &Options{
-	WorkerCount: runtime.NumCPU(),
-	QueueSize:   runtime.NumCPU(),
+	WorkerCount: 2 * runtime.NumCPU(),
+	QueueSize:   4 * runtime.NumCPU(),
 }
 
 func WorkerCount(workerCount int) Option {
