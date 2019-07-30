@@ -31,6 +31,8 @@ func New() *PeerRegister {
 // returns true if a new entry was added
 func (this *PeerRegister) AddOrUpdate(peer *peer.Peer, lock ...bool) bool {
 	this.lock.Lock()
+	peer.PeerMutex.Lock()
+	defer peer.PeerMutex.Unlock()
 	defer this.lock.Unlock()
 
 	if peer.Identity == nil || bytes.Equal(peer.Identity.Identifier, accountability.OwnId().Identifier) {

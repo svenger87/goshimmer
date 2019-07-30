@@ -2,6 +2,7 @@ package request
 
 import (
 	"bytes"
+	"sync"
 	"time"
 
 	"github.com/iotaledger/goshimmer/packages/identity"
@@ -15,6 +16,7 @@ import (
 type Request struct {
 	Issuer    *peer.Peer
 	Signature [SIGNATURE_SIZE]byte
+	mutex     sync.RWMutex
 }
 
 func Unmarshal(data []byte) (*Request, error) {
@@ -84,7 +86,9 @@ func (this *Request) Sign() {
 	if signature, err := this.Issuer.Identity.Sign(this.Marshal()[:SIGNATURE_START]); err != nil {
 		panic(err)
 	} else {
+		this.mutex.Lock()
 		copy(this.Signature[:], signature)
+		this.mutex.Unlock()
 	}
 }
 
@@ -92,8 +96,10 @@ func (this *Request) Marshal() []byte {
 	result := make([]byte, MARSHALED_TOTAL_SIZE)
 
 	result[PACKET_HEADER_START] = MARSHALED_PACKET_HEADER
+	this.mutex.RLock()
 	copy(result[ISSUER_START:ISSUER_END], this.Issuer.Marshal())
 	copy(result[SIGNATURE_START:SIGNATURE_END], this.Signature[:SIGNATURE_SIZE])
+	this.mutex.RUnlock()
 
 	return result
 }

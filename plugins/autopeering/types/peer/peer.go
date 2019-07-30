@@ -79,6 +79,8 @@ func (peer *Peer) Send(data []byte, protocol types.ProtocolType, responseExpecte
 func (peer *Peer) ConnectTCP() (*network.ManagedConnection, bool, error) {
 	if peer.Conn == nil {
 		peer.connectMutex.Lock()
+		peer.PeerMutex.RLock()
+		defer peer.PeerMutex.RUnlock()
 		defer peer.connectMutex.Unlock()
 
 		if peer.Conn == nil {
