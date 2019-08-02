@@ -2,7 +2,10 @@ package statusscreen
 
 import (
 	"sync"
+	"os"
 	"time"
+
+	"golang.org/x/crypto/ssh/terminal"
 
 	"github.com/gdamore/tcell"
 	"github.com/iotaledger/goshimmer/packages/daemon"
@@ -18,6 +21,10 @@ var mutex sync.RWMutex
 var app *tview.Application
 
 func configure(plugin *node.Plugin) {
+	if !terminal.IsTerminal(int(os.Stdin.Fd())) {
+		return
+	}
+
 	node.DEFAULT_LOGGER.SetEnabled(false)
 
 	plugin.Node.AddLogger(DEFAULT_LOGGER)
@@ -32,6 +39,10 @@ func configure(plugin *node.Plugin) {
 }
 
 func run(plugin *node.Plugin) {
+	if !terminal.IsTerminal(int(os.Stdin.Fd())) {
+		return
+	}
+
 	newPrimitive := func(text string) *tview.TextView {
 		textView := tview.NewTextView()
 
@@ -49,6 +60,9 @@ func run(plugin *node.Plugin) {
 	content := tview.NewGrid()
 	content.SetBackgroundColor(tcell.ColorWhite)
 	content.SetColumns(0)
+	content.SetBorders(false)
+	content.SetOffset(0, 0)
+	content.SetGap(0, 0)
 
 	footer := newPrimitive("")
 	footer.SetBackgroundColor(tcell.ColorDarkMagenta)
@@ -81,8 +95,9 @@ func run(plugin *node.Plugin) {
 		defer mutex.RUnlock()
 		headerBar.Update()
 
-		rows := make([]int, 1)
+		rows := make([]int, 2)
 		rows[0] = 1
+		rows[1] = 1
 		_, _, _, height := content.GetRect()
 		for i := 0; i < len(messageLog) && i < height-2; i++ {
 			rows = append(rows, 1)
@@ -95,11 +110,20 @@ func run(plugin *node.Plugin) {
 		blankLine.SetBackgroundColor(tcell.ColorWhite)
 		content.AddItem(blankLine, 0, 0, 1, 1, 0, 0, false)
 
-		for i, message := range messageLog[len(messageLog)-len(rows)-1+2:] {
+		logStart := len(messageLog) - (len(rows) - 2)
+		if logStart < 0 {
+			logStart = 0
+		}
+
+		for i, message := range messageLog[logStart:] {
 			if i < height-2 {
 				content.AddItem(NewUILogEntry(*message).Primitive, i+1, 0, 1, 1, 0, 0, false)
 			}
 		}
+
+		blankLine = newPrimitive("")
+		blankLine.SetBackgroundColor(tcell.ColorWhite)
+		content.AddItem(blankLine, height-1, 0, 1, 1, 0, 0, false)
 
 		return false
 	})
@@ -122,4 +146,4 @@ func run(plugin *node.Plugin) {
 	})
 }
 
-var PLUGIN = node.NewPlugin("Status Screen", configure, run)
+var PLUGIN = node.NewPlugin("Status Screen", node.Enabled, configure, run)

@@ -58,7 +58,7 @@ func sendOutgoingRequests(plugin *node.Plugin) {
 					plugin.LogDebug("sent peering request to " + chosenNeighborCandidate.String())
 
 					if dialed {
-						tcp.HandleConnection(chosenNeighborCandidate.Conn)
+						tcp.HandleConnection(chosenNeighborCandidate.GetConn())
 					}
 				}
 
