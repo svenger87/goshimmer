@@ -8,6 +8,7 @@ import (
 	"github.com/iotaledger/goshimmer/packages/model/value_transaction"
 	"github.com/iotaledger/goshimmer/packages/node"
 	"github.com/iotaledger/goshimmer/packages/typeutils"
+	"github.com/iotaledger/goshimmer/plugins/workerpool"
 	"github.com/iotaledger/iota.go/trinary"
 )
 
@@ -59,11 +60,11 @@ var transactionCache = datastructure.NewLRUCache(TRANSACTION_CACHE_SIZE, &datast
 
 func onEvictTransaction(_ interface{}, value interface{}) {
 	if evictedTransaction := value.(*value_transaction.ValueTransaction); evictedTransaction.GetModified() {
-		go func(evictedTransaction *value_transaction.ValueTransaction) {
+		workerpool.WP.Submit(func() {
 			if err := storeTransactionInDatabase(evictedTransaction); err != nil {
 				panic(err)
 			}
-		}(evictedTransaction)
+		})
 	}
 }
 

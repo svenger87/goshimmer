@@ -7,6 +7,7 @@ import (
 
 	"github.com/iotaledger/goshimmer/packages/events"
 	"github.com/iotaledger/goshimmer/packages/network"
+	"github.com/iotaledger/goshimmer/plugins/workerpool"
 )
 
 type Server struct {
@@ -54,7 +55,7 @@ func (this *Server) Listen(port int) *Server {
 		} else {
 			peer := network.NewManagedConnection(socket)
 			//TODO: check this
-			go this.Events.Connect.Trigger(peer)
+			workerpool.WP.Submit(func() { this.Events.Connect.Trigger(peer) })
 		}
 	}
 

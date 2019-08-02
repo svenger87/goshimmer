@@ -8,6 +8,7 @@ import (
 	"github.com/iotaledger/goshimmer/packages/model/bundle"
 	"github.com/iotaledger/goshimmer/packages/node"
 	"github.com/iotaledger/goshimmer/packages/typeutils"
+	"github.com/iotaledger/goshimmer/plugins/workerpool"
 	"github.com/iotaledger/iota.go/trinary"
 )
 
@@ -62,11 +63,11 @@ var bundleCache = datastructure.NewLRUCache(BUNDLE_CACHE_SIZE, &datastructure.LR
 
 func onEvictBundle(_ interface{}, value interface{}) {
 	if evictedBundle := value.(*bundle.Bundle); evictedBundle.GetModified() {
-		go func(evictedBundle *bundle.Bundle) {
+		workerpool.WP.Submit(func() {
 			if err := storeBundleInDatabase(evictedBundle); err != nil {
 				panic(err)
 			}
-		}(evictedBundle)
+		})
 	}
 }
 

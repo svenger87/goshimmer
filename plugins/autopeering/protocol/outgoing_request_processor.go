@@ -6,6 +6,7 @@ import (
 	"github.com/iotaledger/goshimmer/plugins/autopeering/instances/outgoingrequest"
 	"github.com/iotaledger/goshimmer/plugins/autopeering/protocol/types"
 	"github.com/iotaledger/goshimmer/plugins/autopeering/server/tcp"
+	"github.com/iotaledger/goshimmer/plugins/workerpool"
 
 	"github.com/iotaledger/goshimmer/packages/timeutil"
 
@@ -51,7 +52,8 @@ func sendOutgoingRequests(plugin *node.Plugin) {
 		if candidateShouldBeContacted(chosenNeighborCandidate) {
 			doneChan := make(chan int, 1)
 			//TODO: check this
-			go func(doneChan chan int) {
+
+			workerpool.WP.Submit(func() {
 				if dialed, err := chosenNeighborCandidate.Send(outgoingrequest.INSTANCE.Marshal(), types.PROTOCOL_TYPE_TCP, true); err != nil {
 					plugin.LogDebug(err.Error())
 				} else {
@@ -63,7 +65,7 @@ func sendOutgoingRequests(plugin *node.Plugin) {
 				}
 
 				close(doneChan)
-			}(doneChan)
+			})
 
 			select {
 			case <-daemon.ShutdownSignal:

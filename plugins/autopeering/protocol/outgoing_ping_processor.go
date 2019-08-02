@@ -16,6 +16,7 @@ import (
 	"github.com/iotaledger/goshimmer/plugins/autopeering/types/peer"
 	"github.com/iotaledger/goshimmer/plugins/autopeering/types/ping"
 	"github.com/iotaledger/goshimmer/plugins/autopeering/types/salt"
+	"github.com/iotaledger/goshimmer/plugins/workerpool"
 )
 
 var lastPing time.Time
@@ -74,13 +75,14 @@ func pingPeers(plugin *node.Plugin, outgoingPing *ping.Ping) {
 
 			for _, chosenPeer := range chosenPeers {
 				//TODO: add workerPool
-				go func(chosenPeer *peer.Peer) {
+				chosenPeer := chosenPeer
+				workerpool.WP.Submit(func() {
 					if _, err := chosenPeer.Send(outgoingPing.Marshal(), types.PROTOCOL_TYPE_UDP, false); err != nil {
 						plugin.LogDebug("error when sending ping to " + chosenPeer.String() + ": " + err.Error())
 					} else {
 						plugin.LogDebug("sent ping to " + chosenPeer.String())
 					}
-				}(chosenPeer)
+				})
 			}
 
 			lastPing = time.Now()

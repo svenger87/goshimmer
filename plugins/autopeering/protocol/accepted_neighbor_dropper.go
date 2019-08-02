@@ -10,6 +10,7 @@ import (
 	"github.com/iotaledger/goshimmer/plugins/autopeering/protocol/constants"
 	"github.com/iotaledger/goshimmer/plugins/autopeering/protocol/types"
 	"github.com/iotaledger/goshimmer/plugins/autopeering/types/drop"
+	"github.com/iotaledger/goshimmer/plugins/workerpool"
 )
 
 func createAcceptedNeighborDropper(plugin *node.Plugin) func() {
@@ -29,11 +30,11 @@ func createAcceptedNeighborDropper(plugin *node.Plugin) func() {
 
 						acceptedneighbors.INSTANCE.Remove(furthestNeighbor.Identity.StringIdentifier, false)
 						//TODO: checkThis
-						go func() {
+						workerpool.WP.Submit(func() {
 							if _, err := furthestNeighbor.Send(dropMessage.Marshal(), types.PROTOCOL_TYPE_UDP, false); err != nil {
 								plugin.LogDebug("error when sending drop message to" + acceptedneighbors.FURTHEST_NEIGHBOR.String())
 							}
-						}()
+						})
 					}
 				}
 			}

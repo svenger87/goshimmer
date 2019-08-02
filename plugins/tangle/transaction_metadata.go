@@ -8,6 +8,7 @@ import (
 	"github.com/iotaledger/goshimmer/packages/model/transactionmetadata"
 	"github.com/iotaledger/goshimmer/packages/node"
 	"github.com/iotaledger/goshimmer/packages/typeutils"
+	"github.com/iotaledger/goshimmer/plugins/workerpool"
 	"github.com/iotaledger/iota.go/trinary"
 )
 
@@ -59,11 +60,11 @@ var transactionMetadataCache = datastructure.NewLRUCache(TRANSACTION_METADATA_CA
 
 func onEvictTransactionMetadata(_ interface{}, value interface{}) {
 	if evictedTransactionMetadata := value.(*transactionmetadata.TransactionMetadata); evictedTransactionMetadata.GetModified() {
-		go func(evictedTransactionMetadata *transactionmetadata.TransactionMetadata) {
+		workerpool.WP.Submit(func() {
 			if err := storeTransactionMetadataInDatabase(evictedTransactionMetadata); err != nil {
 				panic(err)
 			}
-		}(evictedTransactionMetadata)
+		})
 	}
 }
 

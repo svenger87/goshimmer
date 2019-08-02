@@ -8,6 +8,7 @@ import (
 	"github.com/iotaledger/goshimmer/packages/model/approvers"
 	"github.com/iotaledger/goshimmer/packages/node"
 	"github.com/iotaledger/goshimmer/packages/typeutils"
+	"github.com/iotaledger/goshimmer/plugins/workerpool"
 	"github.com/iotaledger/iota.go/trinary"
 )
 
@@ -58,11 +59,11 @@ var approversCache = datastructure.NewLRUCache(APPROVERS_CACHE_SIZE, &datastruct
 
 func onEvictApprovers(_ interface{}, value interface{}) {
 	if evictedApprovers := value.(*approvers.Approvers); evictedApprovers.GetModified() {
-		go func(evictedApprovers *approvers.Approvers) {
+		workerpool.WP.Submit(func() {
 			if err := storeApproversInDatabase(evictedApprovers); err != nil {
 				panic(err)
 			}
-		}(evictedApprovers)
+		})
 	}
 }
 

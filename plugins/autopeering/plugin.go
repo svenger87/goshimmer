@@ -18,7 +18,10 @@ import (
 
 var PLUGIN = node.NewPlugin("Auto Peering", node.Enabled, configure, run)
 
+//var autopeeringChan chan bool
+
 func configure(plugin *node.Plugin) {
+	//autopeeringChan = make(chan bool, runtime.NumCPU())
 	saltmanager.Configure(plugin)
 	instances.Configure(plugin)
 	server.Configure(plugin)

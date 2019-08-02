@@ -8,7 +8,7 @@ import (
 	"github.com/iotaledger/goshimmer/plugins/cli"
 	"github.com/iotaledger/goshimmer/plugins/dashboard"
 	"github.com/iotaledger/goshimmer/plugins/gossip"
-	"github.com/iotaledger/goshimmer/plugins/gossip-on-solidification"
+	gossip_on_solidification "github.com/iotaledger/goshimmer/plugins/gossip-on-solidification"
 	"github.com/iotaledger/goshimmer/plugins/gracefulshutdown"
 	"github.com/iotaledger/goshimmer/plugins/metrics"
 	"github.com/iotaledger/goshimmer/plugins/statusscreen"
@@ -18,11 +18,13 @@ import (
 	"github.com/iotaledger/goshimmer/plugins/webapi"
 	webapi_gtta "github.com/iotaledger/goshimmer/plugins/webapi-gtta"
 	webapi_spammer "github.com/iotaledger/goshimmer/plugins/webapi-spammer"
+	"github.com/iotaledger/goshimmer/plugins/workerpool"
 	"github.com/iotaledger/goshimmer/plugins/zeromq"
 )
 
 func main() {
 	node.Run(
+		workerpool.PLUGIN,
 		cli.PLUGIN,
 		autopeering.PLUGIN,
 		gossip.PLUGIN,
