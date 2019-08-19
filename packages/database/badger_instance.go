@@ -45,7 +45,7 @@ func createDB() (*badger.DB, error) {
 	opts := badger.DefaultOptions(directory)
 	opts.Logger = &logger{}
 	opts.Truncate = true
-	opts.TableLoadingMode = options.MemoryMap
+	opts.TableLoadingMode = options.FileIO
 
 	db, err := badger.Open(opts)
 	if err != nil {
